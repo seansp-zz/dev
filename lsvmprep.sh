@@ -151,6 +151,14 @@ case ${vendor} in
         exit 1
 esac
 
+
+
+distro_ver=$(grep "VERSION_ID" /etc/os-release | cut -d "=" -f2 | sed 's/\"//g')
+distro_major_version=$(echo $distro_ver | cut -d "." -f1)
+distro_minor_version=$(echo $distro_ver | cut -d "." -f2)
+
+
+
 ##==============================================================================
 ##
 ## Ask for permissio to change the system
@@ -168,14 +176,14 @@ cat<<EOF
 *   | |     / _ \| | | | | |  | | | | |  \| |     *
 *   | |___ / ___ \ |_| | | |  | | |_| | |\  |     *
 *    \____/_/   \_\___/  |_| |___\___/|_| \_|     *
-*           					  *
-*           					  *
+*                                                 *
+*                                                 *
 * LSVMPREP is about to encrypt the boot partition *
 * and make irreversible configuration changes to  *
 * this machine. If you are certain you want to    *
 * proceed, type YES in uppercase and then press   *
 * enter; else press ENTER to terminate.           *
-*          					  *
+*                                                 *
 ***************************************************
 
 EOF
@@ -252,8 +260,27 @@ check_root_passphrase
 ##
 ##==============================================================================
 
-shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shim(x64)?.efi"`
-echo "## Finding the shim: ${shim}"
+case ${vendor} in
+    centos)
+      if [ "${distro_minor_version}" = "3" ]; then 
+        shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shim(x64)?.efi"`
+      else
+        shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shimx64?.efi"`
+      fi
+        ;;
+    redhat)
+      if [ "${distro_minor_version}" = "3" ]; then 
+        shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shim(x64)?.efi"`
+      else
+        shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shimx64?.efi"`
+      fi
+        ;;
+    *)
+    shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shim(x64)?.efi"`
+esac
+
+echo "## SHIM: ${shim}"
+
 if [ ! -x "${shim}" ]; then
     echo "$0: shim not found"
     exit 1
