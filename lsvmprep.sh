@@ -140,6 +140,7 @@ case ${vendor} in
         ;;
     rhel)
         vendor="redhat"
+        echo "## Vendor defined as ${vendor}"
         ;;
     sles)
         ;;
@@ -200,6 +201,7 @@ ask_permission
 
 check_root_passphrase()
 {
+    echo "## Checking Root PassPhrase"
     rootdev=`./scripts/rootdev`
 
     if [ -z "${rootdev}" ]; then
@@ -224,14 +226,16 @@ check_root_passphrase()
     fi
 
     # Check whether root partition is encrypted.
-    /sbin/cryptsetup luksDump $rootdev 2> /dev/null > /dev/null
+    echo "## Performing luksDump and storing to ~/luksDump[.err|.info]"
+    /sbin/cryptsetup luksDump $rootdev 2> ~/luksDump.err > ~/luksDump.Info
     if [ "$?" != "0" ]; then
         echo "$0: ERROR: The root partition is not a LUKS partition: $rootdev"
         echo ""
         exit 1
     fi
 
-    # Check whether root partition is encrypted with "passprhase"
+    # Check whether root partition is encrypted with "passphrase"
+    echo "## Verifying root partition passphrase is encrypted with 'passphrase'"
     echo -n "passphrase" | /sbin/cryptsetup luksDump --dump-master-key --key-file=- $rootdev 2> /dev/null > /dev/null
     if [ "$?" != "0" ]; then
         echo "$0: ERROR: The root partition passphrase must be 'passphrase'"
@@ -249,7 +253,7 @@ check_root_passphrase
 ##==============================================================================
 
 shim=`ls /boot/efi/EFI/${vendor}/shim*.efi | grep -E "shim(x64)?.efi"`
-
+echo "## Finding the shim: ${shim}"
 if [ ! -x "${shim}" ]; then
     echo "$0: shim not found"
     exit 1
@@ -271,6 +275,8 @@ if [ ! -x "${grub}" ]; then
     exit 1
 fi
 
+echo "## GRUB found as: ${grub}"
+
 ##==============================================================================
 ##
 ## Resolve location of lsvmtool.
@@ -283,6 +289,8 @@ if [ ! -x "${lsvmtool}" ]; then
     echo "$0: lsvmtool not found: ${lsvmtool}"
     exit 1
 fi
+
+echo "## lsvmtool found here: ${lsvmtool}"
 
 ##==============================================================================
 ##
@@ -332,6 +340,8 @@ fi
 ##==============================================================================
 
 lsvmprepfile=/boot/efi/EFI/boot/lsvmprep
+
+echo "## Removing ${lsvmprepfile}"
 rm -f ${lsvmprepfile}
 
 ##==============================================================================
@@ -340,6 +350,7 @@ rm -f ${lsvmprepfile}
 ##
 ##==============================================================================
 
+echo "## Encrypting the boot drive..."
 ${top}/scripts/encryptboot
 chkerr "$?" "$0: failed to encrypt the boot drive"
 
@@ -348,6 +359,7 @@ chkerr "$?" "$0: failed to encrypt the boot drive"
 ## Set up the root drive:
 ##
 ##==============================================================================
+echo "## Setting up the root drive..."
 if [[ ${vendor} != "ubuntu" ]]; then
     ${top}/scripts/setuproot
     chkerr "$?" "$0: failed to setup root drive"
@@ -358,7 +370,6 @@ fi
 ## install_lsvmtool(lsvmtool)
 ##
 ##==============================================================================
-
 install_lsvmtool()
 {
     if [ "$#" != "1" ]; then
@@ -383,7 +394,7 @@ install_lsvmtool()
         exit 1
     fi
 }
-
+echo "## Installing LSVMTOOL"
 install_lsvmtool ${lsvmtool}
 
 ##==============================================================================
@@ -413,6 +424,7 @@ install_lsvmload()
     chkerr "$?" "$0: failed to install lsvmload"
 }
 
+echo "## Installing LSVMLOAD"
 install_lsvmload
 
 ##==============================================================================
@@ -482,6 +494,7 @@ install_lsvmconf()
     rm -rf ${tempfile}
 }
 
+echo "## Install LSVMConf"
 install_lsvmconf ${vendor} ${shim} ${grub}
 
 ##==============================================================================
@@ -522,6 +535,7 @@ install_shim()
     chkerr "$?" "$0: $FUNCNAME(): failed to install ${shim}"
 }
 
+echo "## Installing the shim"
 install_shim ${shim}
 
 ##==============================================================================
@@ -562,6 +576,7 @@ install_grub()
     chkerr "$?" "$0: $FUNCNAME(): failed to install ${grub}"
 }
 
+echo "## Installing grub"
 install_grub ${grub}
 
 ##==============================================================================
@@ -631,6 +646,7 @@ function patch_grub_timeout()
     return 0
 }
 
+echo "## Patching grub timeout."
 patch_grub_timeout
 
 ##==============================================================================
@@ -670,6 +686,7 @@ function patch_grub_terminal()
     return 0
 }
 
+echo "## Patching grub terminal"
 patch_grub_terminal
 
 ##==============================================================================
@@ -736,6 +753,7 @@ generate_grubcfg()
     chkerr "$?" "$0: $FUNCNAME(): ${grubmkconfig} failed"
 }
 
+echo "## Generating the grubcfg..."
 generate_grubcfg ${top} ${vendor} ${lsvmtool} ${grub}
 
 ##==============================================================================
@@ -769,6 +787,7 @@ configure_initrd()
     cd ${top}
 }
 
+echo "## Configure initrd"
 configure_initrd ${top} ${vendor}
 
 ##==============================================================================
@@ -799,7 +818,7 @@ generate_initrd()
             ;;
     esac
 }
-
+echo "Generate init_rd ${vendor}"
 generate_initrd ${vendor}
 
 ##==============================================================================
@@ -831,6 +850,7 @@ apply_dbxupdate()
 }
 
 if [ "${dbxupdateopt}" == "1" ]; then
+    echo "## Apply dbxUpdate..."
     apply_dbxupdate
 fi
 
@@ -896,6 +916,7 @@ seal_key()
 }
 
 if [ "${sealopt}" == "1" ]; then
+    echo "## SEAL is being performed."
 
     bootkey=passphrase
     rootkey=passphrase
@@ -915,6 +936,8 @@ fi
 
 cp VERSION ${lsvmprepfile}
 
+
+echo "## Running sanity check."
 # Run sanity check:
 ./sanity
 
@@ -935,5 +958,5 @@ The passphrase for the boot partition is: passphrase
 
 EOF
 }
-
+echo "## final word."
 final_word
