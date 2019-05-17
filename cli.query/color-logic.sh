@@ -1,3 +1,4 @@
+TERM=ansi
 echoerr() { printf "%s\n" "$*" >&2; }
 red=`tput setaf 1`
 green=`tput setaf 2`
