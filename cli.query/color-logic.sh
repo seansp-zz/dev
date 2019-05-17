@@ -10,3 +10,5 @@ die () {
     echo >&2 "$@"
     exit 3
 }
+
+export TERM
