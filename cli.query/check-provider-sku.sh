@@ -11,12 +11,9 @@ while read LOCATION; do
   DIFF=$(diff new-$PROVIDER.$SKU.$LOCATION.lst $PROVIDER.$SKU.$LOCATION.lst)
   if [ -z "$DIFF" ]
   then
-    echo "${green} No differences ${reset}"
+    echo "${green} Latest Version ${white}$(cat $PROVIDER.$SKU.$LOCATION.lst | cut -f4)${reset}"
   else
-    echo "${red} Difference Found ${reset}"
-    echo "${red} $(cat $PROVIDER.$SKU.$LOCATION.lst)"
-    echo "${green} $(cat new-$PROVIDER.$SKU.$LOCATION.lst)"
-    echoerr "${white} Delta found in $LOCATION ${reset}"
+    echo "${red} New Version Found ${green} $(cat new-$PROVIDER.$SKU.$LOCATION.lst | cut -f4) ${white} > ${red} $(cat $PROVIDER.$SKU.$LOCATION.lst | cut -f4) ${reset}"
     echoerr "${red}$DIFF${reset}"
   fi 
 done <locations.lst
