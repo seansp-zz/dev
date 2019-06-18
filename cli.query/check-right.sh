@@ -18,6 +18,11 @@ performTest()
   fi
 }
 
+performTest Canonical 14.04.1-LTS
+performTest Canonical 14.04.2-LTS
+performTest Canonical 14.04.3-LTS
+performTest Canonical 14.04.4-LTS
+performTest Canonical 14.04.5-LTS
 performTest Canonical 16.04-LTS
 performTest Canonical 16.04.0-LTS
 performTest Canonical 18.04-LTS
