@@ -1,5 +1,4 @@
 #!/bin/bash
-source ./color-logic.sh
 [ "$#" -eq 2 ] || die "2 arguments required... $#"
 PROVIDER=$1
 SKU=$2
@@ -11,9 +10,9 @@ while read LOCATION; do
   DIFF=$(diff new-$PROVIDER.$SKU.$LOCATION.lst $PROVIDER.$SKU.$LOCATION.lst)
   if [ -z "$DIFF" ]
   then
-    echo " Latest Version already detected -- [$(cat $PROVIDER.$SKU.$LOCATION.lst | cut -f4)]"
+    echo " Latest -- [$(cat $PROVIDER.$SKU.$LOCATION.lst | cut -f4)]"
   else
     echo "ALERT: New Version Found [$(cat new-$PROVIDER.$SKU.$LOCATION.lst | cut -f4)] is more recent than [$(cat $PROVIDER.$SKU.$LOCATION.lst | cut -f4)]"
-    echoerr "$DIFF"
+    echo "$DIFF"
   fi 
 done <locations.lst
