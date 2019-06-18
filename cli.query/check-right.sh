@@ -15,10 +15,8 @@ ERRORS=$(cat $ERRORFILE)
 if [ -z "$ERRORS" ]
 then
   echo "No new images."
-  rm $ERRORFILE
 else
   echo "ALERT: New Images Detected."
   echo "$ERRORS"
-  rm $ERRORFILE
   exit 4
 fi
