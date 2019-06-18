@@ -1,6 +1,4 @@
 #!/bin/bash
-source ./color-logic.sh
-
 ERRORFILE=./all-errors.txt
 if test -f "$ERRORFILE"; then
   echo "Deleting previous errors."
@@ -16,10 +14,11 @@ fi
 ERRORS=$(cat $ERRORFILE)
 if [ -z "$ERRORS" ]
 then
-  echo "${green} No new images. ${reset}"
+  echo "No new images."
   rm $ERRORFILE
 else
-  echo "${red} New Images Detected. ${reset}"
+  echo "ALERT: New Images Detected."
+  echo "$ERRORS"
   rm $ERRORFILE
   exit 4
 fi
