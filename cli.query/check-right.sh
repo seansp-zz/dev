@@ -5,18 +5,27 @@ if test -f "$ERRORFILE"; then
   rm $ERRORFILE
 fi
 
-./check-provider-sku.sh Canonical 16.04-LTS 2>>all-errors.txt
-./check-provider-sku.sh Canonical 16.04.0-LTS 2>>all-errors.txt
-./check-provider-sku.sh Canonical 18.04-LTS 2>>all-errors.txt
+ANYERRORS=0
+TOTALCHECKS=0
 
-#rm new-*
+performTest()
+{
+  ((TOTALCHECKS++))
+  ./check-provider-sku.sh $1 $2
+  if [ $? -ne 0 ]; then
+    echo "ALERT: New version detected for $2."
+    ((ANYERRORS++))
+  fi
+}
 
-ERRORS=$(cat $ERRORFILE)
-if [ -z "$ERRORS" ]
-then
-  echo "No new images."
-else
-  echo "ALERT: New Images Detected."
-  echo "$ERRORS"
+performTest Canonical 16.04-LTS
+performTest Canonical 16.04.0-LTS
+performTest Canonical 18.04-LTS
+
+echo "$TOTALCHECKS images checked. Any Errors = $ANYERRORS"
+if [ $ANYERRORS -ne 0 ]; then
+  echo "Errors were encountered."
   exit 4
+else
+  echo "All images up to date."
 fi
